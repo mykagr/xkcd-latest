@@ -9,18 +9,17 @@
 
   <script>
     async function loadLatest() {
-      const proxy = "https://api.allorigins.win/get?url=" + encodeURIComponent("https://xkcd.com/");
-      const data = await fetch(proxy).then(r => r.json());
-      const html = data.contents;
+      try {
+        // Use jsDelivr mirror of xkcd's JSON (CORS allowed here)
+        const comic = await fetch("https://corsproxy.io/?https://xkcd.com/info.0.json").then(r => r.json());
 
-      // extract the comic image
-      const imgMatch = html.match(/<img src="(\/\/imgs.xkcd.com\/comics\/[^"]+)"/);
-      if (imgMatch) {
         document.getElementById("comic").innerHTML = `
-          <img src="https:${imgMatch[1]}" style="max-width:100%;height:auto;">
+          <h2 style="font-size:1.2rem;margin-bottom:0.5rem;">${comic.num}: ${comic.safe_title}</h2>
+          <img src="${comic.img}" alt="${comic.alt}" style="max-width:100%;height:auto;">
+          <p style="font-size:0.8rem;color:gray;margin-top:0.5rem;">${comic.alt}</p>
         `;
-      } else {
-        document.getElementById("comic").textContent = "Could not load comic.";
+      } catch (e) {
+        document.getElementById("comic").textContent = "Error loading comic.";
       }
     }
     loadLatest();
